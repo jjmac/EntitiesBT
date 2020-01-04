@@ -5,6 +5,6 @@ namespace EntitiesBT.Entities
 {
     public class BlackboardComponent : IComponentData
     {
-        public IBlackboard Value;
+        public CustomBlackboard Value;
     }
 }

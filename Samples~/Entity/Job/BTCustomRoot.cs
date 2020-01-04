@@ -3,6 +3,7 @@ using EntitiesBT.Core;
 using EntitiesBT.Entities;
 using Unity.Entities;
 using UnityEngine;
+using NodeBlobRef = EntitiesBT.Entities.NodeBlobRef;
 
 namespace EntitiesBT.Sample
 {
@@ -20,10 +21,11 @@ namespace EntitiesBT.Sample
         {
             var blobRef = new NodeBlobRef(RootNode.ToBlob());
             var bb = new CustomBlackboard();
-            VirtualMachine.Reset(blobRef, bb);
+            VirtualMachine.Reset(ref blobRef, ref bb);
             
             dstManager.AddComponentData(entity, blobRef);
             dstManager.AddComponentData(entity, bb);
+            dstManager.AddComponentData(entity, new TickDeltaTime());
         }
     }
 }

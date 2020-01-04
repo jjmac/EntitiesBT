@@ -1,21 +1,23 @@
-using System;
 using EntitiesBT.Core;
+using EntitiesBT.Entities;
+using Unity.Burst;
 
 namespace EntitiesBT.Nodes
 {
+    [BurstCompile]
     [BehaviorNode("8A3B18AE-C5E9-4F34-BCB7-BD645C5017A5", BehaviorNodeType.Composite)]
     public class SequenceNode
     {
-        private static readonly Func<int, INodeBlob, IBlackboard, NodeState> _tickFunc = SuccessionNode.Tick(NodeState.Success);
-
-        public static void Reset(int index, INodeBlob blob, IBlackboard blackboard)
+        [BurstCompile]
+        public static void Reset(int index, ref NodeBlobRef blob, ref CustomBlackboard blackboard)
         {
-            SuccessionNode.Reset(index, blob, blackboard);
+            SuccessionNode.Reset(index, ref blob, ref blackboard);
         }
 
-        public static NodeState Tick(int index, INodeBlob blob, IBlackboard blackboard)
+        [BurstCompile]
+        public static NodeState Tick(int index, ref NodeBlobRef blob, ref CustomBlackboard blackboard)
         {
-            return _tickFunc(index, blob, blackboard);
+            return SuccessionNode.Tick(NodeState.Success, index, ref blob, ref blackboard);
         }
     }
 }

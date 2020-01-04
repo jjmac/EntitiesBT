@@ -3,34 +3,71 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
+using EntitiesBT.Entities;
+using Unity.Burst;
+using Unity.Collections;
+using UnityEngine.Scripting;
 
 namespace EntitiesBT.Core
 {
-    using ResetFunc = Action<int, INodeBlob, IBlackboard>;
-    using TickFunc = Func<int, INodeBlob, IBlackboard, NodeState>;
     
+    [BurstCompile]
     public static class VirtualMachine
     {
-        private static readonly Dictionary<int, ResetFunc> _resets = new Dictionary<int, ResetFunc>();
-        private static readonly Dictionary<int, TickFunc> _ticks = new Dictionary<int, TickFunc>();
+        public delegate void ResetFunc(int index, ref NodeBlobRef blob, ref CustomBlackboard bb);
+        public delegate NodeState TickFunc(int index, ref NodeBlobRef blob, ref CustomBlackboard bb);
+        
+        private static readonly NativeHashMap<int, FunctionPointer<ResetFunc>> _resets;
+        private static readonly NativeHashMap<int, FunctionPointer<TickFunc>> _ticks;
 
         static VirtualMachine()
         {
-            foreach (var type in AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(assembly => assembly.GetTypes()))
+            _resets = new NativeHashMap<int, FunctionPointer<ResetFunc>>(128, Allocator.Persistent);
+            _ticks = new NativeHashMap<int, FunctionPointer<TickFunc>>(128, Allocator.Persistent);
+            
+            AppDomain.CurrentDomain.DomainUnload += (sender, args) =>
             {
-                var attribute = type.GetCustomAttribute<BehaviorNodeAttribute>();
-                if (attribute == null) continue;
-                var resetFunc = type.GetMethod(attribute.ResetFunc).GetResetFunc();
-                var tickFunc = type.GetMethod(attribute.TickFunc).GetTickFunc();
-                Register(attribute.Id, resetFunc, tickFunc);
-            }
+                _resets.Dispose();
+                _ticks.Dispose();
+            };
+
+            // try
+            // {
+                foreach (var type in AppDomain.CurrentDomain.GetAssemblies()
+                    .SelectMany(assembly => assembly.GetTypes()))
+                {
+                    var attribute = type.GetCustomAttribute<BehaviorNodeAttribute>();
+                    if (attribute == null) continue;
+                    var resetFunc = type.GetMethod(attribute.ResetFunc).GetResetFunc();
+                    var tickFunc = type.GetMethod(attribute.TickFunc).GetTickFunc();
+                    var id = attribute.Id;
+
+                    if (_resets.ContainsKey(id)) throw new DuplicateNameException($"Reset function {id} already registered");
+                    if (_ticks.ContainsKey(id)) throw new DuplicateNameException($"Tick function {id} already registered");
+                    _resets[id] = BurstCompiler.CompileFunctionPointer(resetFunc);
+                    _ticks[id] = BurstCompiler.CompileFunctionPointer(tickFunc);
+                }
+            // }
+            // catch (Exception _)
+            // {
+            //     _resets.Dispose();
+            //     _ticks.Dispose();
+            // }
+            // finally
+            // {
+            // }
         }
+        
+        [Preserve, BurstCompile]
+        static void DefaultReset(int index, ref NodeBlobRef blob, ref CustomBlackboard bb) {}
+        
+        [Preserve, BurstCompile]
+        static NodeState DefaultTick(int index, ref NodeBlobRef blob, ref CustomBlackboard bb) => NodeState.None;
 
         static ResetFunc GetResetFunc(this MethodInfo methodInfo)
         {
             return methodInfo == null
-                ? (index, blob, bb) => {}
+                ? DefaultReset
                 : (ResetFunc)methodInfo.CreateDelegate(typeof(ResetFunc))
             ;
         }
@@ -38,50 +75,57 @@ namespace EntitiesBT.Core
         static TickFunc GetTickFunc(this MethodInfo methodInfo)
         {
             return methodInfo == null
-                ? (index, blob, bb) => NodeState.Running
+                ? DefaultTick
                 : (TickFunc)methodInfo.CreateDelegate(typeof(TickFunc))
             ;
         }
 
-        static void Register(int id, ResetFunc reset, TickFunc tick)
+        // static void Register(int id, ResetFunc reset, TickFunc tick)
+        // {
+        //     if (_resets.ContainsKey(id)) throw new DuplicateNameException($"Reset function {id} already registered");
+        //     if (_ticks.ContainsKey(id)) throw new DuplicateNameException($"Tick function {id} already registered");
+        //
+        //     _resets[id] = reset;
+        //     _ticks[id] = tick;
+        // }
+        
+        [BurstCompile]
+        public static NodeState Tick(ref NodeBlobRef blob, ref CustomBlackboard bb)
         {
-            if (_resets.ContainsKey(id)) throw new DuplicateNameException($"Reset function {id} already registered");
-            if (_ticks.ContainsKey(id)) throw new DuplicateNameException($"Tick function {id} already registered");
-
-            _resets[id] = reset;
-            _ticks[id] = tick;
+            return Tick(0, ref blob, ref bb);
         }
         
-        public static NodeState Tick(INodeBlob blob, IBlackboard bb)
-        {
-            return Tick(0, blob, bb);
-        }
-        
-        public static NodeState Tick(int index, INodeBlob blob, IBlackboard bb)
+        [BurstCompile]
+        public static NodeState Tick(int index, ref NodeBlobRef blob, ref CustomBlackboard bb)
         {
             var typeId = blob.GetTypeId(index);
-            var state = _ticks[typeId](index, blob, bb);
+            var state = _ticks[typeId].Invoke(index, ref blob, ref bb);
+            // var state = _ticks[typeId](index, blob, bb);
             // Debug.Log($"[BT] tick: {index}-{node.GetType().Name}-{state}");
             return state;
         }
 
-        public static void Reset(int index, INodeBlob blob, IBlackboard bb)
+        [BurstCompile]
+        public static void Reset(int index, ref NodeBlobRef blob, ref CustomBlackboard bb)
         {
             var typeId = blob.GetTypeId(index);
-            _resets[typeId](index, blob, bb);
+            _resets[typeId].Invoke(index, ref blob, ref bb);
+            // _resets[typeId](index, blob, bb);
             // Debug.Log($"[BT] tick: {index}-{node.GetType().Name}-{state}");
         }
 
-        public static void Reset(int fromIndex, int count, INodeBlob blob, IBlackboard bb)
+        [BurstCompile]
+        public static void Reset(int fromIndex, int count, ref NodeBlobRef blob, ref CustomBlackboard bb)
         {
             for (var i = fromIndex; i < fromIndex + count; i++)
-                Reset(i, blob, bb);
+                Reset(i, ref blob, ref bb);
         }
 
-        public static void Reset(INodeBlob blob, IBlackboard bb)
+        [BurstCompile]
+        public static void Reset(ref NodeBlobRef blob, ref CustomBlackboard bb)
         {
             var count = blob.GetEndIndex(0);
-            Reset(0, count, blob, bb);
+            Reset(0, count, ref blob, ref bb);
         }
     }
 }

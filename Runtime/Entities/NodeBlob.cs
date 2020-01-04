@@ -1,11 +1,12 @@
 using System;
+using System.Runtime.InteropServices;
 using EntitiesBT.Core;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 
 namespace EntitiesBT.Entities
 {
-    public struct NodeBlob : INodeBlob
+    public struct NodeBlob
     {
         public const int VERSION = 0;
 
@@ -42,7 +43,7 @@ namespace EntitiesBT.Entities
             UnsafeUtility.SizeOf<NodeBlob>() + dataSize + sizeof(int) * count * 3 /* Types/EndIndices/Offsets */;
     }
 
-    public struct NodeBlobRef : IComponentData, INodeBlob
+    public struct NodeBlobRef : IComponentData
     {
         private ref NodeBlob _blob => ref BlobRef.Value;
         public BlobAssetReference<NodeBlob> BlobRef;

@@ -1,8 +1,11 @@
 using System;
 using EntitiesBT.Core;
+using EntitiesBT.Entities;
+using Unity.Burst;
 
 namespace EntitiesBT.Nodes
 {
+    [BurstCompile]
     [BehaviorNode("46540F67-6145-4433-9A3A-E470992B952E", BehaviorNodeType.Decorate)]
     public class TimerNode
     {
@@ -14,14 +17,16 @@ namespace EntitiesBT.Nodes
             public NodeState BreakReturnState;
         }
 
-        public static void Reset(int index, INodeBlob blob, IBlackboard blackboard)
+        [BurstCompile]
+        public static void Reset(int index, ref NodeBlobRef blob, ref CustomBlackboard blackboard)
         {
             ref var data = ref blob.GetNodeData<Data>(index);
             data.Current = TimeSpan.Zero;
             data.ChildState = NodeState.Running;
         }
 
-        public static NodeState Tick(int index, INodeBlob blob, IBlackboard blackboard)
+        [BurstCompile]
+        public static NodeState Tick(int index, ref NodeBlobRef blob, ref CustomBlackboard blackboard)
         {
             ref var data = ref blob.GetNodeData<Data>(index);
 
@@ -31,10 +36,12 @@ namespace EntitiesBT.Nodes
             var childIndex = index + 1;
             if (data.ChildState == NodeState.Running && childIndex < blob.GetEndIndex(index))
             {
-                var childState = VirtualMachine.Tick(childIndex, blob, blackboard);
+                var childState = VirtualMachine.Tick(childIndex, ref blob, ref blackboard);
                 data.ChildState = childState;
             }
-            data.Current += blackboard.GetData<TickDeltaTime>().Value;
+
+            ref var deltaTime = ref blackboard.GetData<TickDeltaTime>();
+            data.Current += deltaTime.Value;
             return NodeState.Running;
         }
     }

@@ -10,10 +10,10 @@ namespace EntitiesBT
     {
         protected override void OnUpdate()
         {
+            var deltaTime = TimeSpan.FromSeconds(Time.DeltaTime);
             Entities.ForEach((BlackboardComponent bb, ref TickDeltaTime dt) =>
             {
-                var deltaTime = TimeSpan.FromSeconds(Time.DeltaTime);
-                bb.Value.SetData(new TickDeltaTime{Value = deltaTime});
+                dt.Value += deltaTime;
             });
         }
     }

@@ -1,8 +1,11 @@
 using System;
 using EntitiesBT.Core;
+using EntitiesBT.Entities;
+using Unity.Burst;
 
 namespace EntitiesBT.Nodes
 {
+    [BurstCompile]
     public static class SuccessionNode
     {
         public struct Data : INodeData
@@ -10,35 +13,34 @@ namespace EntitiesBT.Nodes
             public int ChildIndex;
         }
 
-        public static void Reset(int index, INodeBlob blob, IBlackboard blackboard)
+        [BurstCompile]
+        public static void Reset(int index, ref NodeBlobRef blob, ref CustomBlackboard bb)
         {
             blob.GetNodeData<Data>(index).ChildIndex = index + 1;
         }
 
-        public static Func<int, INodeBlob, IBlackboard, NodeState> Tick(NodeState continueState)
+        [BurstCompile]
+        public static NodeState Tick(NodeState continueState, int index, ref NodeBlobRef blob, ref CustomBlackboard bb)
         {
-            return (index, blob, bb) =>
+            ref var childIndex = ref blob.GetNodeData<Data>(index).ChildIndex;
+            var endIndex = blob.GetEndIndex(index);
+            if (childIndex >= endIndex) throw new IndexOutOfRangeException();
+
+            while (childIndex < endIndex)
             {
-                ref var childIndex = ref blob.GetNodeData<Data>(index).ChildIndex;
-                var endIndex = blob.GetEndIndex(index);
-                if (childIndex >= endIndex) throw new IndexOutOfRangeException();
+                var childState = VirtualMachine.Tick(childIndex, ref blob, ref bb);
 
-                while (childIndex < endIndex)
+                if (childState == NodeState.Running) return childState;
+
+                if (childState != continueState)
                 {
-                    var childState = VirtualMachine.Tick(childIndex, blob, bb);
-
-                    if (childState == NodeState.Running) return childState;
-
-                    if (childState != continueState)
-                    {
-                        childIndex = endIndex;
-                        return childState;
-                    }
-
-                    childIndex = blob.GetEndIndex(childIndex);
+                    childIndex = endIndex;
+                    return childState;
                 }
-                return continueState;
-            };
+
+                childIndex = blob.GetEndIndex(childIndex);
+            }
+            return continueState;
         }
     }
 }
