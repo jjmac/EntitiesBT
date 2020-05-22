@@ -468,7 +468,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &113567596
 Transform:
   m_ObjectHideFlags: 0
@@ -829,7 +829,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &260283773
 Transform:
   m_ObjectHideFlags: 0
@@ -1684,7 +1684,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _file: {fileID: 0}
   _rootNode: {fileID: 124417801}
-  _thread: 1
+  _thread: 0
   _autoCreateTypes: 1
   _order: 0
   _debugName: 
@@ -1968,7 +1968,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &600359260
 Transform:
   m_ObjectHideFlags: 0
@@ -2625,7 +2625,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _file: {fileID: 0}
   _rootNode: {fileID: 950849821}
-  _thread: 2
+  _thread: 0
   _autoCreateTypes: 1
   _order: 0
   _debugName: 
@@ -2854,7 +2854,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _file: {fileID: 4900000, guid: 33c02bf2d9f6e477ba7cce0e0c9976bd, type: 3}
   _rootNode: {fileID: 0}
-  _thread: 1
+  _thread: 0
   _autoCreateTypes: 1
   _order: 1
   _debugName: Rotate
@@ -3080,7 +3080,7 @@ MonoBehaviour:
   _file: {fileID: 0}
   _rootNode: {fileID: 7154796706415700006, guid: 446c81f12e25b45bdad4d0d6471cf973,
     type: 3}
-  _thread: 2
+  _thread: 0
   _autoCreateTypes: 1
   _order: 0
   _debugName: Move
@@ -3172,7 +3172,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _file: {fileID: 4900000, guid: 33c02bf2d9f6e477ba7cce0e0c9976bd, type: 3}
   _rootNode: {fileID: 0}
-  _thread: 2
+  _thread: 0
   _autoCreateTypes: 1
   _order: 1
   _debugName: Rotate
@@ -3736,7 +3736,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _file: {fileID: 0}
   _rootNode: {fileID: 108759892}
-  _thread: 2
+  _thread: 0
   _autoCreateTypes: 1
   _order: 0
   _debugName: 
@@ -3964,7 +3964,7 @@ MonoBehaviour:
   _file: {fileID: 0}
   _rootNode: {fileID: 7154796706415700006, guid: 446c81f12e25b45bdad4d0d6471cf973,
     type: 3}
-  _thread: 2
+  _thread: 0
   _autoCreateTypes: 1
   _order: 0
   _debugName: 
@@ -4320,7 +4320,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _file: {fileID: 0}
   _rootNode: {fileID: 1659773008}
-  _thread: 2
+  _thread: 0
   _autoCreateTypes: 1
   _order: 0
   _debugName: 
@@ -4903,7 +4903,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _file: {fileID: 0}
   _rootNode: {fileID: 271263580}
-  _thread: 2
+  _thread: 0
   _autoCreateTypes: 1
   _order: 0
   _debugName: 
@@ -5524,7 +5524,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _file: {fileID: 0}
   _rootNode: {fileID: 662140730}
-  _thread: 2
+  _thread: 0
   _autoCreateTypes: 1
   _order: 0
   _debugName: 
@@ -5846,7 +5846,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _file: {fileID: 0}
   _rootNode: {fileID: 2048944608}
-  _thread: 2
+  _thread: 0
   _autoCreateTypes: 1
   _order: 0
   _debugName: 
@@ -6362,7 +6362,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _file: {fileID: 0}
   _rootNode: {fileID: 873378153}
-  _thread: 2
+  _thread: 0
   _autoCreateTypes: 1
   _order: 0
   _debugName: 
@@ -6771,7 +6771,7 @@ MonoBehaviour:
   _file: {fileID: 0}
   _rootNode: {fileID: 7154796706415700006, guid: 446c81f12e25b45bdad4d0d6471cf973,
     type: 3}
-  _thread: 1
+  _thread: 0
   _autoCreateTypes: 1
   _order: 0
   _debugName: 
@@ -6862,7 +6862,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _file: {fileID: 0}
   _rootNode: {fileID: 648552812}
-  _thread: 1
+  _thread: 0
   _autoCreateTypes: 1
   _order: 0
   _debugName: 
